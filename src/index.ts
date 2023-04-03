@@ -26,13 +26,6 @@ mongoose
       ['Новая задача'],
     ]).resize();
 
-    bot.on('message', async (ctx) => {
-      await Log.create({
-        author: ctx.message.from.first_name,
-        message: JSON.stringify(ctx.message),
-      });
-    });
-
     bot.start(async (ctx) => {
       const { id, first_name } = ctx.message.from;
 
@@ -91,6 +84,19 @@ mongoose
       });
 
       ctx.reply(response.data.choices[0].message?.content ?? '');
+    });
+
+    bot.on('message', async (ctx) => {
+      console.log(`Requested by: ${ctx.message.from.first_name}`, ctx.message);
+
+      await Log.create({
+        author: ctx.message.from.first_name,
+        message: JSON.stringify(ctx.message),
+      });
+
+      ctx.reply(
+        'Я не понимаю тебя. Попробуй еще раз. Пришли мне сообщение "Новая задача".'
+      );
     });
 
     bot.launch();
