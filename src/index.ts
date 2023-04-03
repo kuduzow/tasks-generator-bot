@@ -4,8 +4,11 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import User from './models/User.model';
 import Task, { ITask } from './models/Task.model';
+import Log from './models/Log.model';
 
 dotenv.config();
+
+const maxTasksPerDay = Number(process.env.MAX_TASKS_PER_DAY ?? 10);
 
 mongoose
   .connect(process.env.MONGODB_URI ?? '')
@@ -23,6 +26,13 @@ mongoose
       ['Новая задача'],
     ]).resize();
 
+    bot.on('message', async (ctx) => {
+      await Log.create({
+        author: ctx.message.from.first_name,
+        message: JSON.stringify(ctx.message),
+      });
+    });
+
     bot.start(async (ctx) => {
       const { id, first_name } = ctx.message.from;
 
@@ -39,6 +49,9 @@ mongoose
       ctx.reply(
         'Мы создали этот бот, чтобы ты мог потренироваться в решении задач на основы JavaScript.\n\n' +
           'Бот работает в тестовом режиме. Некоторые задачи могут оказаться неточными или слишком сложными.\n\n' +
+          'В течение суток можно сгенерировать ' +
+          maxTasksPerDay +
+          +' задач.\n\n' +
           'Если есть идеи по улучшению или замечания, то пиши на почту ammya@ya.ru',
         generateRequestKeyboard
       );
